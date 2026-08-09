@@ -1,0 +1,24 @@
+{
+  "name": "auto-resource-updater-backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "check": "node --check src/server.js && node --check src/config.js && node --check src/database.js && node --check src/routes/platform.js && node --check src/services/accounts.js && node --check src/services/affiliates.js && node --check src/services/paypal.js && node --check src/services/users.js && node --check src/resources.js && node --check src/security.js && node --check src/update-plan.js && node --check src/lua-config.js",
+    "paypal:webhook:register": "node scripts/register-paypal-webhook.js",
+    "db:migrate": "node scripts/migrate.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "diff": "^8.0.2",
+    "fastify": "^5.6.2",
+    "jsonwebtoken": "^9.0.2",
+    "luaparse": "^0.3.1",
+    "mysql2": "^3.14.5",
+    "semver": "^7.7.3",
+    "undici": "^7.16.0"
+  }
+}

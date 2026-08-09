@@ -1,0 +1,13 @@
+import "dotenv/config";
+const api = (process.env.PAYPAL_API_URL || "https://api-m.sandbox.paypal.com").replace(/\/$/, "");
+const id = process.env.PAYPAL_CLIENT_ID;
+const secret = process.env.PAYPAL_CLIENT_SECRET;
+const url = process.env.PAYPAL_WEBHOOK_URL;
+if (!id || !secret || !url?.startsWith("https://")) throw new Error("Configure PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET and an HTTPS PAYPAL_WEBHOOK_URL");
+const auth = await fetch(`${api}/v1/oauth2/token`, { method: "POST", headers: { Authorization: `Basic ${Buffer.from(`${id}:${secret}`).toString("base64")}`, "Content-Type": "application/x-www-form-urlencoded" }, body: "grant_type=client_credentials" });
+if (!auth.ok) throw new Error("PayPal authentication failed");
+const token = (await auth.json()).access_token;
+const response = await fetch(`${api}/v1/notifications/webhooks`, { method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify({ url, event_types: ["BILLING.SUBSCRIPTION.CREATED","BILLING.SUBSCRIPTION.ACTIVATED","BILLING.SUBSCRIPTION.UPDATED","BILLING.SUBSCRIPTION.EXPIRED","BILLING.SUBSCRIPTION.CANCELLED","BILLING.SUBSCRIPTION.SUSPENDED","BILLING.SUBSCRIPTION.PAYMENT.FAILED","PAYMENT.SALE.COMPLETED","PAYMENT.SALE.REFUNDED","PAYMENT.SALE.REVERSED","PAYMENT.CAPTURE.COMPLETED","PAYMENT.CAPTURE.REFUNDED","PAYMENT.CAPTURE.REVERSED"].map((name) => ({ name })) }) });
+const data = await response.json();
+if (!response.ok) throw new Error(JSON.stringify(data));
+console.log(`PAYPAL_WEBHOOK_ID=${data.id}`);

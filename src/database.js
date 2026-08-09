@@ -1,0 +1,4 @@
+import mysql from "mysql2/promise.js";
+import { config } from "./config.js";
+export const db = mysql.createPool({ host: config.mysql.host, port: config.mysql.port, user: config.mysql.user, password: config.mysql.password, database: config.mysql.database, waitForConnections: true, connectionLimit: config.mysql.connectionLimit, maxIdle: config.mysql.connectionLimit, idleTimeout: 60_000, queueLimit: 0, enableKeepAlive: true, keepAliveInitialDelay: 0, decimalNumbers: true, timezone: "Z" });
+export async function transaction(work) { const connection = await db.getConnection(); try { await connection.beginTransaction(); const result = await work(connection); await connection.commit(); return result; } catch (error) { await connection.rollback(); throw error; } finally { connection.release(); } }
